@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kafka.carbongraphvisual.domain.mapper.TransactionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.kafka.carbongraph.domain.TransactionDO">
+        <id column="id" property="id" />
+        <result column="model_json" property="modelJson" />
+        <result column="total_e" property="totalE" />
+        <result column="total_c" property="totalC" />
+        <result column="title" property="title" />
+    </resultMap>
+
+</mapper>
