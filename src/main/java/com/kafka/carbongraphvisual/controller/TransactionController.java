@@ -63,7 +63,7 @@ public class TransactionController {
     }
 
     @PostMapping("/addNodes")
-    public Result<Boolean> addNodes(@RequestBody AddNodesReq req){
+    public Result<TransactionModelVO> addNodes(@RequestBody AddNodesReq req){
         BatchAddNodesParam param = BeanConvertUtil.copy(req, BatchAddNodesParam.class);
         List<Vertex> vertices = req.getKeys().stream().map(e -> {
             Vertex vertex = new Vertex();
@@ -72,7 +72,16 @@ public class TransactionController {
         }).collect(Collectors.toList());
 
         param.setNodes(vertices);
-        return Result.success(transactionService.batchInsertNodes(param));
+        TransactionDO transactionDO = transactionService.batchInsertNodes(param);
+        TransactionModelVO transactionModelVO = convertToModelVO(transactionDO);
+        return Result.success(transactionModelVO);
+    }
+
+    @PostMapping("/calculate")
+    public Result<TransactionModelVO> calculate(){
+        TransactionDO transactionDO = transactionService.calculateModel();
+        TransactionModelVO transactionModelVO = convertToModelVO(transactionDO);
+        return Result.success(transactionModelVO);
     }
 
     @GetMapping("/getCurrentTransaction")

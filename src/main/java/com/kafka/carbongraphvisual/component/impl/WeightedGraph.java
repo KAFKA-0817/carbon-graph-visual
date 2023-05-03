@@ -6,13 +6,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafka.carbongraphvisual.bean.VO.EdgeVO;
 import com.kafka.carbongraphvisual.bean.VO.VertexVO;
 import com.kafka.carbongraphvisual.component.Graph;
+import com.kafka.carbongraphvisual.domain.ClientDO;
 import com.kafka.carbongraphvisual.domain.TransactionDO;
 import com.kafka.carbongraphvisual.domain.mapper.TransactionMapper;
+import com.kafka.carbongraphvisual.entity.Client;
+import com.kafka.carbongraphvisual.entity.Distributor;
+import com.kafka.carbongraphvisual.entity.Producer;
+import com.kafka.carbongraphvisual.entity.Supplier;
 import com.kafka.carbongraphvisual.meta.Model;
+import com.kafka.carbongraphvisual.service.ClientService;
+import com.kafka.carbongraphvisual.service.DistributorService;
+import com.kafka.carbongraphvisual.service.ProducerService;
+import com.kafka.carbongraphvisual.service.SupplierService;
+import com.kafka.carbongraphvisual.utils.BeanConvertUtil;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,13 +33,30 @@ import java.util.stream.Collectors;
 public class WeightedGraph implements Graph {
 
     private TransactionMapper transactionMapper;
+    private ClientService clientService;
+    private DistributorService distributorService;
+    private ProducerService producerService;
+    private SupplierService supplierService;
 
     private List<Vertex> vertices;
     private List<Edge> edges;
+    private List<Client> clients;
+    private List<Distributor> distributors;
+    private List<Producer> producers;
+    private List<Supplier> suppliers;
 
     @Autowired
-    public WeightedGraph(TransactionMapper transactionMapper){
+    public WeightedGraph(TransactionMapper transactionMapper,
+                         ClientService clientService,
+                         DistributorService distributorService,
+                         ProducerService producerService,
+                         SupplierService supplierService){
         this.transactionMapper=transactionMapper;
+        this.clientService=clientService;
+        this.distributorService=distributorService;
+        this.producerService=producerService;
+        this.supplierService=supplierService;
+
         //初始化顶点表边表
         this.vertices = new ArrayList<>();
         this.edges= new ArrayList<>();
@@ -38,7 +66,34 @@ public class WeightedGraph implements Graph {
         TransactionDO enableDO = transactionMapper.selectOne(queryWrapper);
         //初始化图
         initGraph(enableDO);
+        //加载结点详细属性
+        loadExt();
         display();
+    }
+
+    public void loadExt(){
+        ArrayList<String> clientNames = new ArrayList<>();
+        ArrayList<String> distributorNames = new ArrayList<>();
+        ArrayList<String> producerNames = new ArrayList<>();
+        ArrayList<String> supplierNames = new ArrayList<>();
+        vertices.forEach(e ->{
+            String[] split = e.getKey().split("-");
+            switch (split[0]){
+                case "client": clientNames.add(split[1]);break;
+                case "distributor": distributorNames.add(split[1]);break;
+                case "producer": producerNames.add(split[1]);break;
+                case "supplier": supplierNames.add(split[1]);break;
+            }
+        });
+
+        if (!clientNames.isEmpty()) {
+            List<ClientDO> clientDOS = clientService.listByNames(clientNames);
+            this.clients = BeanConvertUtil.copyList(clientDOS, Client.class);
+        }
+
+        if (!distributorNames.isEmpty()) this.distributors=BeanConvertUtil.copyList(distributorService.listByNames(distributorNames),Distributor.class);
+        if (!producerNames.isEmpty()) this.producers=BeanConvertUtil.copyList(producerService.listByNames(producerNames),Producer.class);
+        if (!supplierNames.isEmpty()) this.suppliers=BeanConvertUtil.copyList(supplierService.listByNames(supplierNames),Supplier.class);
     }
 
     public void initGraph(TransactionDO transaction){
@@ -68,12 +123,11 @@ public class WeightedGraph implements Graph {
         List<VertexVO> vertices= new ArrayList<>();
         List<EdgeVO> edgeVOS=new ArrayList<>();
         for (Vertex vertex : this.vertices) {
-            VertexVO vertexVO = new VertexVO();
-            vertexVO.setKey(vertex.getKey());
+            VertexVO vertexVO = BeanConvertUtil.copy(vertex,VertexVO.class);
             vertices.add(vertexVO);
             Edge arc = vertex.getFirstEdge();
             while (arc!=null){
-                EdgeVO edgeVO = new EdgeVO();
+                EdgeVO edgeVO = BeanConvertUtil.copy(arc,EdgeVO.class);
                 edgeVO.setFrom(vertex.getKey());
                 edgeVO.setTo(arc.getTargetKey());
                 edgeVOS.add(edgeVO);
@@ -116,15 +170,22 @@ public class WeightedGraph implements Graph {
     }
 
     @Override
+    public Vertex getVertex(String key) {
+        for (Vertex vertex : vertices) {
+            if (key.equals(vertex.getKey())) return vertex;
+        }
+        return null;
+    }
+
+    @Override
     public void addVertex(Vertex vertex) {
         vertices.add(vertex);
     }
 
     @Override
     public void addEdge(EdgeVO edgeVO) {
-        Edge edge = new Edge();
+        Edge edge = BeanConvertUtil.copy(edgeVO, Edge.class);
         edge.setTargetKey(edgeVO.getTo());
-        edge.setWeight(edgeVO.getDistance());
 
         for (Vertex vertex : vertices) {
             if (edgeVO.getFrom().equals(vertex.getKey())){
@@ -132,6 +193,11 @@ public class WeightedGraph implements Graph {
                 edges.add(edge);
             }
         }
+    }
+
+    @Override
+    public void clearEdge() {
+        this.edges=new ArrayList<>();
     }
 
     @Override

@@ -40,16 +40,5 @@ public class ClientController {
         ClientDO clientDO = BeanConvertUtil.copy(req, ClientDO.class);
         return Result.success(clientService.updateById(clientDO));
     }
-
-    @PostMapping("/delete")
-    public Result<Boolean> deleteClient(@RequestBody DeleteClientReq req){
-        //检查当前事务是否占用
-
-
-        //未占用，执行删除
-
-        //占用报错
-        return Result.success();
-    }
 }
 

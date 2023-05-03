@@ -6,4 +6,6 @@ import lombok.Data;
 public class VertexVO {
 
     private String key;
+
+    private int supply;
 }

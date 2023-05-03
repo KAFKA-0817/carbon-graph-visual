@@ -1,5 +1,7 @@
 package com.kafka.carbongraphvisual;
 
+import com.kafka.carbongraphvisual.domain.ClientDO;
+import com.kafka.carbongraphvisual.entity.Producer;
 import com.kafka.carbongraphvisual.utils.NodeMappingUtil;
 import org.jgrapht.alg.flow.PushRelabelMFImpl;
 import org.jgrapht.alg.flow.mincost.CapacityScalingMinimumCostFlow;
@@ -9,6 +11,9 @@ import org.jgrapht.alg.interfaces.MinimumCostFlowAlgorithm;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class UtilTest {
 
@@ -45,6 +50,11 @@ public class UtilTest {
         public int getSupply(){
             return this.supply;
         }
+
+        @Override
+        public String toString() {
+            return name ;
+        }
     }
 
     @Test
@@ -54,21 +64,31 @@ public class UtilTest {
 
 
     @Test
+    void otherTest(){
+
+    }
+
+    @Test
     void graphTest(){
-        SimpleDirectedWeightedGraph<String, CapacityWeightedEdge> graph = new SimpleDirectedWeightedGraph<>(CapacityWeightedEdge.class);
-        String  source="source",
-                s1 = "S1",
-                p1 = "P1", p2 = "P2",
-                d1 = "D1", d2 = "D2",
-                v_d1="v_d1",v_d2="v_d2",
-                c = "C",
-                v_c="v_C";
-//        SupplierNode s1= new SupplierNode("S1",8791),
-//                     p1= new SupplierNode("P1",7979),
-//                     p2= new SupplierNode("P2",7435),
-//                     d1= new SupplierNode("D1",4008),
-//                     d2= new SupplierNode("D2",4178),
-//                     c= new SupplierNode("C",-2090);
+        SimpleDirectedWeightedGraph<SupplierNode, CapacityWeightedEdge> graph = new SimpleDirectedWeightedGraph<>(CapacityWeightedEdge.class);
+//        String  source="source",
+//                s1 = "S1",
+//                p1 = "P1", p2 = "P2",
+//                d1 = "D1", d2 = "D2",
+//                v_d1="v_d1",v_d2="v_d2",
+//                c = "C",
+//                v_c="v_C";
+
+        SupplierNode source = new SupplierNode("source",8000),
+                     s1= new SupplierNode("S1",0),
+                     p1= new SupplierNode("P1",0),
+                     p2= new SupplierNode("P2",0),
+                     v_d1 = new SupplierNode("v_d1",0),
+                     v_d2 = new SupplierNode("v_d2",0),
+                     d1= new SupplierNode("D1",0),
+                     d2= new SupplierNode("D2",0),
+                     v_c = new SupplierNode("v_c",0),
+                     c= new SupplierNode("C",-8000);
 
 
         graph.addVertex(source);
@@ -85,21 +105,7 @@ public class UtilTest {
         // 添加边
         CapacityWeightedEdge sourceTos1 = graph.addEdge(source, s1);
         CapacityWeightedEdge e1 = graph.addEdge(s1, p1);
-//        graph.setEdgeWeight(e1,1);
         CapacityWeightedEdge e2 = graph.addEdge(s1, p2);
-//        graph.setEdgeWeight(e2,3);
-//        CapacityWeightedEdge e3 = graph.addEdge(p1, d1);
-//        graph.setEdgeWeight(e3,1);
-//        CapacityWeightedEdge e4 = graph.addEdge(p1, d2);
-//        graph.setEdgeWeight(e4,5);
-//        CapacityWeightedEdge e5 = graph.addEdge(p2, d1);
-//        graph.setEdgeWeight(e5,2);
-//        CapacityWeightedEdge e6 = graph.addEdge(p2, d2);
-//        graph.setEdgeWeight(e6,1);
-//        CapacityWeightedEdge e7 = graph.addEdge(d1, c);
-//        graph.setEdgeWeight(e7,2);
-//        CapacityWeightedEdge e8 = graph.addEdge(d2, c);
-//        graph.setEdgeWeight(e8,3);
         CapacityWeightedEdge e3 = graph.addEdge(p1, v_d1);
         CapacityWeightedEdge e4 = graph.addEdge(p1, v_d2);
         CapacityWeightedEdge e5 = graph.addEdge(p2, v_d1);
@@ -120,36 +126,47 @@ public class UtilTest {
         e8.setCapacity(0,4178);
         e9.setCapacity(0, (int) Double.POSITIVE_INFINITY);
         e10.setCapacity(0, (int) Double.POSITIVE_INFINITY);
-        e11.setCapacity(0,2090);
+        e11.setCapacity(0,8000);
+        graph.setEdgeWeight(sourceTos1,0);
+        graph.setEdgeWeight(e1,5);
+        graph.setEdgeWeight(e2,7);
+        graph.setEdgeWeight(e3,2);
+        graph.setEdgeWeight(e4,3);
+        graph.setEdgeWeight(e5,3);
+        graph.setEdgeWeight(e6,6);
+        graph.setEdgeWeight(e7,0);
+        graph.setEdgeWeight(e8,0);
+        graph.setEdgeWeight(e9,6);
+        graph.setEdgeWeight(e10,3);
+        graph.setEdgeWeight(e11,0);
 
-        graph.setEdgeWeight(sourceTos1,8791);
-        graph.setEdgeWeight(e1, 7979);
-        graph.setEdgeWeight(e2, 7435);
-        graph.setEdgeWeight(e3,(int) Double.POSITIVE_INFINITY);
-        graph.setEdgeWeight(e4,(int) Double.POSITIVE_INFINITY);
-        graph.setEdgeWeight(e5, (int) Double.POSITIVE_INFINITY);
-        graph.setEdgeWeight(e6, (int) Double.POSITIVE_INFINITY);
-        graph.setEdgeWeight(e7, 4008);
-        graph.setEdgeWeight(e8, 4178);
-        graph.setEdgeWeight(e9, (int) Double.POSITIVE_INFINITY);
-        graph.setEdgeWeight(e10, (int) Double.POSITIVE_INFINITY);
-        graph.setEdgeWeight(e11, 2090);
 
-//        CapacityScalingMinimumCostFlow<String, CapacityWeightedEdge> costFlow = new CapacityScalingMinimumCostFlow<>();
-//
-//        MinimumCostFlowProblem.MinimumCostFlowProblemImpl<String, CapacityWeightedEdge> problem = new MinimumCostFlowProblem.MinimumCostFlowProblemImpl<>(
-//                graph,
-//                a->0,
-//                CapacityWeightedEdge::getCapacityMax,
-//                CapacityWeightedEdge::getCapacityMin
-//        );
-//        MinimumCostFlowAlgorithm.MinimumCostFlow<CapacityWeightedEdge> minimumCostFlow = costFlow.getMinimumCostFlow(problem);
-//        System.out.println(costFlow.getFlowMap());
-//        System.out.println(minimumCostFlow.getCost());
-        PushRelabelMFImpl<String, CapacityWeightedEdge> pushRelabelMF = new PushRelabelMFImpl<>(graph);
-        MaximumFlowAlgorithm.MaximumFlow<CapacityWeightedEdge> maximumFlow = pushRelabelMF.getMaximumFlow(source, c);
-        System.out.println(maximumFlow.getValue());
-        System.out.println(maximumFlow.getFlowMap());
+        CapacityScalingMinimumCostFlow<SupplierNode, CapacityWeightedEdge> costFlow = new CapacityScalingMinimumCostFlow<>();
 
+        MinimumCostFlowProblem.MinimumCostFlowProblemImpl<SupplierNode, CapacityWeightedEdge> problem = new MinimumCostFlowProblem.MinimumCostFlowProblemImpl<>(
+                graph,
+                SupplierNode::getSupply,
+                CapacityWeightedEdge::getCapacityMax,
+                CapacityWeightedEdge::getCapacityMin
+        );
+        MinimumCostFlowAlgorithm.MinimumCostFlow<CapacityWeightedEdge> minimumCostFlow = costFlow.getMinimumCostFlow(problem);
+        System.out.println(costFlow.getFlowMap());
+        System.out.println(minimumCostFlow.getCost());
+
+    }
+
+    @Test
+    void mapTest(){
+        Map<String, Object> hashMap = new HashMap<>();
+        Producer producer = new Producer();
+        producer.setName("P1");
+        producer.setKey(producer.getKey());
+        producer.setCpp("123");
+        producer.setEpp("50");
+        producer.setCapacity("2800");
+        hashMap.put(producer.getKey(),producer);
+
+        Producer producer1 = (Producer) hashMap.get(producer.getKey());
+        System.out.println(producer1.getCpp());
     }
 }

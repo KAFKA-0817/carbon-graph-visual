@@ -4,7 +4,7 @@ package com.kafka.carbongraphvisual.meta;
 public enum StatusCode {
 
     OK(200,null),
-    VERTEXNOTFOUND(10_000,"找不到结点");
+    VERTEX_NOTFOUND(10_000,"找不到结点");
 
 
     private final int code;

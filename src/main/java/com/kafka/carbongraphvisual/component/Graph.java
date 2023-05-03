@@ -9,9 +9,12 @@ public interface Graph {
     int getVerticesSize();
     int getEdgesSize();
 
+    Vertex getVertex(String key);
+
     void addVertex(Vertex vertex);
     void addEdge(EdgeVO edgeVO);
 
+    void clearEdge();
     void removeVertex(Vertex v);
     void removeEdge(EdgeVO edgeVO);
 

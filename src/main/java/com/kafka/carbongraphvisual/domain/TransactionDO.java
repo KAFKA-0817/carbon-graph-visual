@@ -38,13 +38,13 @@ public class TransactionDO implements Serializable {
      * 总碳排放量
      */
     @TableField("total_e")
-    private String totalE;
+    private double totalE;
 
     /**
      * 总经济成本
      */
     @TableField("total_c")
-    private String totalC;
+    private double totalC;
 
     /**
      * 事务名称

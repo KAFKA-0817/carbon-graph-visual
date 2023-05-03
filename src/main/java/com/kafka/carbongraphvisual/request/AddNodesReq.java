@@ -8,6 +8,4 @@ import java.util.List;
 public class AddNodesReq {
 
     private List<String> keys;
-
-    private Long transactionId;
 }

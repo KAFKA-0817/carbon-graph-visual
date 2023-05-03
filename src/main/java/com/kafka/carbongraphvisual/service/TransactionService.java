@@ -18,7 +18,9 @@ public interface TransactionService extends IService<TransactionDO> {
 
     TransactionDO getEnableTransaction();
 
-    boolean batchInsertNodes(BatchAddNodesParam param);
+    TransactionDO batchInsertNodes(BatchAddNodesParam param);
+
+    TransactionDO calculateModel();
 
     boolean saveCurrent();
 

@@ -7,5 +7,7 @@ public class Vertex {
 
     protected String key;
 
+    private int supply;
+
     private Edge firstEdge;
 }

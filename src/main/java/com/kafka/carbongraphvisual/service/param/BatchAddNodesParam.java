@@ -9,6 +9,4 @@ import java.util.List;
 public class BatchAddNodesParam {
 
     private List<Vertex> nodes;
-
-    private Long transactionId;
 }

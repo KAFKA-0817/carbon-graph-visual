@@ -1,12 +1,12 @@
 package com.kafka.carbongraphvisual.entity;
 
-import com.kafka.carbongraphvisual.component.impl.Vertex;
+import com.kafka.carbongraphvisual.component.impl.CoordinatedVertex;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Distributor extends Vertex {
+public class Distributor extends CoordinatedVertex {
 
     /**
      * 经销商名
@@ -18,15 +18,7 @@ public class Distributor extends Vertex {
      */
     private String capacity;
 
-    /**
-     * x坐标
-     */
-    private String x;
 
-    /**
-     * y坐标
-     */
-    private String y;
 
     @Override
     public String getKey() {
