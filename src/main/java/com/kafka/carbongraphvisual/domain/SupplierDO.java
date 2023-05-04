@@ -49,13 +49,13 @@ public class SupplierDO implements Serializable {
      * x坐标
      */
     @TableField("x")
-    private String x;
+    private double x;
 
     /**
      * y坐标
      */
     @TableField("y")
-    private String y;
+    private double y;
 
 
 }

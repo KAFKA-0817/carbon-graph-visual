@@ -3,7 +3,9 @@ package com.kafka.carbongraphvisual.request;
 import lombok.Data;
 
 @Data
-public class DeleteClientReq {
+public class PageQueryReq {
 
-    private Long id;
+    private int current;
+
+    private int size;
 }
