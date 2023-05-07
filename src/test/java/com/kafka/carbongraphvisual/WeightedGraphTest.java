@@ -2,10 +2,7 @@ package com.kafka.carbongraphvisual;
 
 
 import com.kafka.carbongraphvisual.bean.VO.EdgeVO;
-import com.kafka.carbongraphvisual.component.impl.CapacityWeightedEdge;
-import com.kafka.carbongraphvisual.component.impl.SupplierNode;
-import com.kafka.carbongraphvisual.component.impl.Vertex;
-import com.kafka.carbongraphvisual.component.impl.WeightedGraph;
+import com.kafka.carbongraphvisual.component.impl.*;
 import com.kafka.carbongraphvisual.entity.Producer;
 import com.kafka.carbongraphvisual.meta.Constants;
 import com.kafka.carbongraphvisual.service.TransactionService;
@@ -47,11 +44,15 @@ public class WeightedGraphTest {
     @Test
     void testMap(){
         ArrayList<String> strings = new ArrayList<>();
+        strings.add("C1");
+        strings.add("P1");
+        strings.add("D1");
+        strings.add("S1");
         strings.add("D2");
         strings.add("C2");
         strings.add("C3");
-        List<Vertex> collect = strings.stream().map(e -> {
-            Vertex vertex = new Vertex();
+        List<CoordinatedVertex> collect = strings.stream().map(e -> {
+            CoordinatedVertex vertex = new CoordinatedVertex();
             vertex.setKey(NodeMappingUtil.mapping(e));
             return vertex;
         }).collect(Collectors.toList());
@@ -84,7 +85,7 @@ public class WeightedGraphTest {
             if (source.getKey().startsWith("Source")){
                 SupplierNode target = capacityWeightedEdgeGraph.getEdgeTarget(edge);
                 Vertex supplier = graph.getVertex(target.getKey());
-                supplier.setSupply(supplier.getSupply()+key.getValue().intValue());
+                supplier.setValue(supplier.getValue()+key.getValue().intValue());
             //若为S->虚拟P边，计算epp，挂载S->P边
             }else if (source.getKey().startsWith("supplier")){
                 SupplierNode target = capacityWeightedEdgeGraph.getEdgeTarget(edge);
@@ -95,7 +96,7 @@ public class WeightedGraphTest {
             }else if (source.getKey().startsWith("v-producer")){
                 SupplierNode target = capacityWeightedEdgeGraph.getEdgeTarget(edge);
                 Vertex producer = graph.getVertex(target.getKey());
-                producer.setSupply(producer.getSupply()+key.getValue().intValue());
+                producer.setValue(producer.getValue()+key.getValue().intValue());
                 for (Producer producerNode : graph.getProducers()) {
                     if (target.getKey().equals(producerNode.getKey())) epp+=Double.parseDouble(producerNode.getEpp())*key.getValue();
                 }
@@ -109,12 +110,12 @@ public class WeightedGraphTest {
             }else if (source.getKey().startsWith("v-distributor")){
                 SupplierNode target = capacityWeightedEdgeGraph.getEdgeTarget(edge);
                 Vertex distributor = graph.getVertex(target.getKey());
-                distributor.setSupply(distributor.getSupply()+key.getValue().intValue());
+                distributor.setValue(distributor.getValue()+key.getValue().intValue());
             //若为D->C边，计算epp，挂载D->C边，为C设置当前流
             }else if (source.getKey().startsWith("distributor")){
                 SupplierNode target = capacityWeightedEdgeGraph.getEdgeTarget(edge);
                 Vertex client = graph.getVertex(target.getKey());
-                client.setSupply(client.getSupply()+key.getValue().intValue());
+                client.setValue(client.getValue()+key.getValue().intValue());
                 Double dis = NodeMappingUtil.calculateDis(source, target);
                 epp+=dis* Constants.EDC.getValue();
                 graph.addEdge(new EdgeVO(source.getKey(),target.getKey(),key.getValue()));

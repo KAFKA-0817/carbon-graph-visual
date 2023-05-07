@@ -7,15 +7,15 @@ public class EdgeVO {
 
     public EdgeVO(){}
 
-    public EdgeVO(String from,String to,Double weight){
-        this.from=from;
-        this.to=to;
-        this.weight=weight;
+    public EdgeVO(String source,String target,double value){
+        this.source=source;
+        this.target=target;
+        this.value=value;
     }
 
-    private String from;
+    private String source;
 
-    private String to;
+    private String target;
 
-    private Double weight;
+    private double value;
 }

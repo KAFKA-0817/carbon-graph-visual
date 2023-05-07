@@ -10,6 +10,11 @@ public class TransactionVO {
 
 
     /**
+     * 主键id
+     */
+    private Long id;
+
+    /**
      * 总碳排放量
      */
     private double totalE;

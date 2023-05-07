@@ -38,7 +38,7 @@ public class WeightedGraph implements Graph {
     private ProducerService producerService;
     private SupplierService supplierService;
 
-    private List<Vertex> vertices;
+    private List<CoordinatedVertex> vertices;
     private List<Edge> edges;
     private List<Client> clients;
     private List<Distributor> distributors;
@@ -86,14 +86,34 @@ public class WeightedGraph implements Graph {
             }
         });
 
+        vertices = new ArrayList<>();
+
         if (!clientNames.isEmpty()) {
             List<ClientDO> clientDOS = clientService.listByNames(clientNames);
-            this.clients = BeanConvertUtil.copyList(clientDOS, Client.class);
+            List<Client> clients = BeanConvertUtil.copyList(clientDOS, Client.class);
+            this.clients = clients;
+            clients.forEach(e -> e.setKey(e.getKey()));
+            this.vertices.addAll(clients);
         }
 
-        if (!distributorNames.isEmpty()) this.distributors=BeanConvertUtil.copyList(distributorService.listByNames(distributorNames),Distributor.class);
-        if (!producerNames.isEmpty()) this.producers=BeanConvertUtil.copyList(producerService.listByNames(producerNames),Producer.class);
-        if (!supplierNames.isEmpty()) this.suppliers=BeanConvertUtil.copyList(supplierService.listByNames(supplierNames),Supplier.class);
+        if (!distributorNames.isEmpty()) {
+            List<Distributor> distributors = BeanConvertUtil.copyList(distributorService.listByNames(distributorNames), Distributor.class);
+            this.distributors= distributors;
+            distributors.forEach(e -> e.setKey(e.getKey()));
+            this.vertices.addAll(distributors);
+        }
+        if (!producerNames.isEmpty()) {
+            List<Producer> producers = BeanConvertUtil.copyList(producerService.listByNames(producerNames), Producer.class);
+            this.producers= producers;
+            producers.forEach(e -> e.setKey(e.getKey()));
+            this.vertices.addAll(producers);
+        }
+        if (!supplierNames.isEmpty()) {
+            List<Supplier> suppliers = BeanConvertUtil.copyList(supplierService.listByNames(supplierNames), Supplier.class);
+            this.suppliers= suppliers;
+            suppliers.forEach(e -> e.setKey(e.getKey()));
+            this.vertices.addAll(suppliers);
+        }
     }
 
     public void initGraph(TransactionDO transaction){
@@ -109,8 +129,8 @@ public class WeightedGraph implements Graph {
         //边表挂载
         if (model!=null){
             this.vertices = model.getVertices().stream().map(e -> {
-                Vertex vertex = new Vertex();
-                vertex.setKey(e.getKey());
+                CoordinatedVertex vertex = new CoordinatedVertex();
+                vertex.setKey(e.getName());
                 return vertex;
             }).collect(Collectors.toList());
             model.getEdges().forEach(this::addEdge);
@@ -124,12 +144,13 @@ public class WeightedGraph implements Graph {
         List<EdgeVO> edgeVOS=new ArrayList<>();
         for (Vertex vertex : this.vertices) {
             VertexVO vertexVO = BeanConvertUtil.copy(vertex,VertexVO.class);
+            vertexVO.setName(vertex.getKey());
             vertices.add(vertexVO);
             Edge arc = vertex.getFirstEdge();
             while (arc!=null){
                 EdgeVO edgeVO = BeanConvertUtil.copy(arc,EdgeVO.class);
-                edgeVO.setFrom(vertex.getKey());
-                edgeVO.setTo(arc.getTargetKey());
+                edgeVO.setSource(vertex.getKey());
+                edgeVO.setTarget(arc.getTargetKey());
                 edgeVOS.add(edgeVO);
                 arc=arc.getNextEdge();
             }
@@ -178,17 +199,17 @@ public class WeightedGraph implements Graph {
     }
 
     @Override
-    public void addVertex(Vertex vertex) {
+    public void addVertex(CoordinatedVertex vertex) {
         vertices.add(vertex);
     }
 
     @Override
     public void addEdge(EdgeVO edgeVO) {
         Edge edge = BeanConvertUtil.copy(edgeVO, Edge.class);
-        edge.setTargetKey(edgeVO.getTo());
+        edge.setTargetKey(edgeVO.getTarget());
 
         for (Vertex vertex : vertices) {
-            if (edgeVO.getFrom().equals(vertex.getKey())){
+            if (edgeVO.getSource().equals(vertex.getKey())){
                 linkArc(vertex,edge);
                 edges.add(edge);
             }

@@ -5,7 +5,11 @@ import lombok.Data;
 @Data
 public class VertexVO {
 
-    private String key;
+    private String name;
 
-    private int supply;
+    private int value;
+
+    private double x;
+
+    private double y;
 }

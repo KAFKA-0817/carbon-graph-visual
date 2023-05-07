@@ -9,5 +9,5 @@ public class Edge {
 
     private Edge nextEdge;
 
-    private Double weight;
+    private double value;
 }

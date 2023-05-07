@@ -5,22 +5,23 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafka.carbongraphvisual.bean.VO.TransactionModelVO;
 import com.kafka.carbongraphvisual.bean.VO.TransactionVO;
+import com.kafka.carbongraphvisual.component.impl.CoordinatedVertex;
 import com.kafka.carbongraphvisual.component.impl.Vertex;
-import com.kafka.carbongraphvisual.domain.TransactionDO;
+import com.kafka.carbongraphvisual.domain.*;
 import com.kafka.carbongraphvisual.meta.Model;
 import com.kafka.carbongraphvisual.meta.Result;
 import com.kafka.carbongraphvisual.request.AddNodesReq;
 import com.kafka.carbongraphvisual.request.ChangeTransactionReq;
 import com.kafka.carbongraphvisual.request.CreateTransactionReq;
-import com.kafka.carbongraphvisual.service.TransactionService;
+import com.kafka.carbongraphvisual.service.*;
 import com.kafka.carbongraphvisual.service.param.BatchAddNodesParam;
 import com.kafka.carbongraphvisual.service.param.StartNewTransactionParam;
 import com.kafka.carbongraphvisual.utils.BeanConvertUtil;
 import com.kafka.carbongraphvisual.utils.NodeMappingUtil;
-import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,14 @@ public class TransactionController {
 
     @Resource
     private TransactionService transactionService;
+    @Resource
+    private ClientService clientService;
+    @Resource
+    private DistributorService distributorService;
+    @Resource
+    private ProducerService producerService;
+    @Resource
+    private SupplierService supplierService;
 
     @GetMapping("/getAll")
     public Result<List<TransactionVO>> getAllTransaction(){
@@ -65,8 +74,8 @@ public class TransactionController {
     @PostMapping("/addNodes")
     public Result<TransactionModelVO> addNodes(@RequestBody AddNodesReq req){
         BatchAddNodesParam param = BeanConvertUtil.copy(req, BatchAddNodesParam.class);
-        List<Vertex> vertices = req.getKeys().stream().map(e -> {
-            Vertex vertex = new Vertex();
+        List<CoordinatedVertex> vertices = req.getNodes().stream().map(e -> {
+            CoordinatedVertex vertex = new CoordinatedVertex();
             vertex.setKey(NodeMappingUtil.mapping(e));
             return vertex;
         }).collect(Collectors.toList());
@@ -89,6 +98,16 @@ public class TransactionController {
         TransactionDO currentTransactionDO = transactionService.getCurrentTransaction();
         TransactionModelVO transactionModelVO = convertToModelVO(currentTransactionDO);
         return Result.success(transactionModelVO);
+    }
+
+    @GetMapping("/getAllNodeNames")
+    public Result<List<String>> getAllNodeNames(){
+        List<String> names = new ArrayList<>();
+        names.addAll(clientService.list().stream().map(ClientDO::getName).collect(Collectors.toList()));
+        names.addAll(distributorService.list().stream().map(DistributorDO::getName).collect(Collectors.toList()));
+        names.addAll(producerService.list().stream().map(ProducerDO::getName).collect(Collectors.toList()));
+        names.addAll(supplierService.list().stream().map(SupplierDO::getName).collect(Collectors.toList()));
+        return Result.success(names);
     }
 
     private TransactionModelVO convertToModelVO(TransactionDO transactionDO){

@@ -36,7 +36,7 @@ public class TransactionServiceTest {
         nodes.add(distributor);
         nodes.add(producer);
         nodes.add(supplier);
-        param.setNodes(nodes);
+//        param.setNodes(nodes);
         transactionService.batchInsertNodes(param);
     }
 }

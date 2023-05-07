@@ -32,9 +32,7 @@ public class ClientController {
     public Result<Page<ClientVO>> getAllClient(@RequestBody PageQueryReq req){
         Page<ClientDO> clientDOPage = clientService.page(new Page<>(req.getCurrent(), req.getSize()));
         List<ClientVO> clientVOS = clientDOPage.getRecords().stream().map(e -> {
-            ClientVO clientVO = new ClientVO();
-            clientVO.setName(e.getName());
-            clientVO.setDemand(e.getDemand());
+            ClientVO clientVO = BeanConvertUtil.copy(e, ClientVO.class);
             clientVO.setCoordinate("(" + e.getX() + "," + e.getY() + ")");
             return clientVO;
         }).collect(Collectors.toList());
