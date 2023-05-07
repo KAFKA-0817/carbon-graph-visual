@@ -13,8 +13,10 @@ import com.kafka.carbongraphvisual.meta.Result;
 import com.kafka.carbongraphvisual.request.AddNodesReq;
 import com.kafka.carbongraphvisual.request.ChangeTransactionReq;
 import com.kafka.carbongraphvisual.request.CreateTransactionReq;
+import com.kafka.carbongraphvisual.request.SaveTransactionReq;
 import com.kafka.carbongraphvisual.service.*;
 import com.kafka.carbongraphvisual.service.param.BatchAddNodesParam;
+import com.kafka.carbongraphvisual.service.param.SaveTransactionParam;
 import com.kafka.carbongraphvisual.service.param.StartNewTransactionParam;
 import com.kafka.carbongraphvisual.utils.BeanConvertUtil;
 import com.kafka.carbongraphvisual.utils.NodeMappingUtil;
@@ -47,7 +49,15 @@ public class TransactionController {
     @GetMapping("/getAll")
     public Result<List<TransactionVO>> getAllTransaction(){
         List<TransactionDO> list = transactionService.list();
-        List<TransactionVO> transactionVOList = BeanConvertUtil.copyList(list, TransactionVO.class);
+        List<TransactionVO> transactionVOList = list.stream().map(e -> {
+            TransactionVO transactionVO = new TransactionVO();
+            transactionVO.setTitle(e.getTitle());
+            transactionVO.setStatus(e.getStatus());
+            transactionVO.setTotalC(String.format("%.2f", e.getTotalC()));
+            transactionVO.setTotalE(String.format("%.2f", e.getTotalE()));
+            return transactionVO;
+        }).collect(Collectors.toList());
+
         return Result.success(transactionVOList);
     }
 
@@ -58,14 +68,14 @@ public class TransactionController {
         return Result.success(result);
     }
 
-    @PostMapping("/shutdown")
-    public Result<Boolean> shutdownTransaction(){
-        return Result.success(transactionService.saveCurrent());
+    @PostMapping("/save")
+    public Result<Boolean> saveTransaction(@RequestBody SaveTransactionReq req){
+        SaveTransactionParam param = BeanConvertUtil.copy(req, SaveTransactionParam.class);
+        return Result.success(transactionService.saveCurrent(param));
     }
 
     @PostMapping("/change")
     public Result<TransactionModelVO> changeTransaction(@RequestBody ChangeTransactionReq req){
-        transactionService.saveCurrent();
         TransactionDO transactionDO = transactionService.loadTransaction(req.getTransactionId());
         TransactionModelVO transactionModelVO = convertToModelVO(transactionDO);
         return Result.success(transactionModelVO);
@@ -90,6 +100,8 @@ public class TransactionController {
     public Result<TransactionModelVO> calculate(){
         TransactionDO transactionDO = transactionService.calculateModel();
         TransactionModelVO transactionModelVO = convertToModelVO(transactionDO);
+        transactionModelVO.setTotalC(String.format("%.2f",transactionDO.getTotalC()));
+        transactionModelVO.setTotalE(String.format("%.2f",transactionDO.getTotalE()));
         return Result.success(transactionModelVO);
     }
 
@@ -113,6 +125,8 @@ public class TransactionController {
     private TransactionModelVO convertToModelVO(TransactionDO transactionDO){
         if (transactionDO!=null){
             TransactionModelVO currentTransactionVO = BeanConvertUtil.copy(transactionDO, TransactionModelVO.class);
+            currentTransactionVO.setTotalC(String.format("%.2f",transactionDO.getTotalC()));
+            currentTransactionVO.setTotalE(String.format("%.2f",transactionDO.getTotalE()));
             Model model = null;
             try {
                 model = new ObjectMapper().readValue(transactionDO.getModelJson(), Model.class);

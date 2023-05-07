@@ -12,6 +12,7 @@ import com.kafka.carbongraphvisual.entity.Producer;
 import com.kafka.carbongraphvisual.meta.Constants;
 import com.kafka.carbongraphvisual.service.TransactionService;
 import com.kafka.carbongraphvisual.service.param.BatchAddNodesParam;
+import com.kafka.carbongraphvisual.service.param.SaveTransactionParam;
 import com.kafka.carbongraphvisual.service.param.StartNewTransactionParam;
 import com.kafka.carbongraphvisual.utils.BeanConvertUtil;
 import com.kafka.carbongraphvisual.utils.NodeMappingUtil;
@@ -170,11 +171,12 @@ public class TransactionServiceImpl extends ServiceImpl<TransactionMapper, Trans
     }
 
     @Override
-    public boolean saveCurrent() {
+    public boolean saveCurrent(SaveTransactionParam param) {
         TransactionDO enableTransaction = getEnableTransaction();
         if (enableTransaction!=null) {
             enableTransaction.setModelJson(graph.getModelJson());
-            enableTransaction.setStatus(1);
+            enableTransaction.setTotalC(param.getTotalC());
+            enableTransaction.setTotalE(param.getTotalE());
             return updateById(enableTransaction);
         }
         return true;

@@ -39,7 +39,8 @@ public class WeightedGraph implements Graph {
     private SupplierService supplierService;
 
     private List<CoordinatedVertex> vertices;
-    private List<Edge> edges;
+//    private List<Edge> edges;
+    private List<EdgeVO> edges;
     private List<Client> clients;
     private List<Distributor> distributors;
     private List<Producer> producers;
@@ -128,34 +129,35 @@ public class WeightedGraph implements Graph {
         }
         //边表挂载
         if (model!=null){
+            this.edges=model.getEdges();
             this.vertices = model.getVertices().stream().map(e -> {
                 CoordinatedVertex vertex = new CoordinatedVertex();
                 vertex.setKey(e.getName());
                 return vertex;
             }).collect(Collectors.toList());
-            model.getEdges().forEach(this::addEdge);
+//            model.getEdges().forEach(this::addEdge);
         }
+
         System.out.println("Graph init");
     }
 
     public String getModelJson(){
         Model model = new Model();
         List<VertexVO> vertices= new ArrayList<>();
-        List<EdgeVO> edgeVOS=new ArrayList<>();
         for (Vertex vertex : this.vertices) {
             VertexVO vertexVO = BeanConvertUtil.copy(vertex,VertexVO.class);
             vertexVO.setName(vertex.getKey());
             vertices.add(vertexVO);
-            Edge arc = vertex.getFirstEdge();
-            while (arc!=null){
-                EdgeVO edgeVO = BeanConvertUtil.copy(arc,EdgeVO.class);
-                edgeVO.setSource(vertex.getKey());
-                edgeVO.setTarget(arc.getTargetKey());
-                edgeVOS.add(edgeVO);
-                arc=arc.getNextEdge();
-            }
+//            Edge arc = vertex.getFirstEdge();
+//            while (arc!=null){
+//                EdgeVO edgeVO = BeanConvertUtil.copy(arc,EdgeVO.class);
+//                edgeVO.setSource(vertex.getKey());
+//                edgeVO.setTarget(arc.getTargetKey());
+//                edgeVOS.add(edgeVO);
+//                arc=arc.getNextEdge();
+//            }
         }
-        model.setEdges(edgeVOS);
+        model.setEdges(this.edges);
         model.setVertices(vertices);
         try {
             return new ObjectMapper().writeValueAsString(model);
@@ -205,15 +207,17 @@ public class WeightedGraph implements Graph {
 
     @Override
     public void addEdge(EdgeVO edgeVO) {
-        Edge edge = BeanConvertUtil.copy(edgeVO, Edge.class);
-        edge.setTargetKey(edgeVO.getTarget());
+        this.edges.add(edgeVO);
+//        Edge edge = BeanConvertUtil.copy(edgeVO, Edge.class);
+//        edge.setTargetKey(edgeVO.getTarget());
+//
+//        for (Vertex vertex : vertices) {
+//            if (edgeVO.getSource().equals(vertex.getKey())){
+//                linkArc(vertex,edge);
+//                edges.add(edge);
+//            }
+//        }
 
-        for (Vertex vertex : vertices) {
-            if (edgeVO.getSource().equals(vertex.getKey())){
-                linkArc(vertex,edge);
-                edges.add(edge);
-            }
-        }
     }
 
     @Override

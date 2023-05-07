@@ -17,12 +17,12 @@ public class TransactionVO {
     /**
      * 总碳排放量
      */
-    private double totalE;
+    private String totalE;
 
     /**
      * 总经济成本
      */
-    private double totalC;
+    private String totalC;
 
     /**
      * 事务名称
